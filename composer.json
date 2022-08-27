@@ -1,0 +1,20 @@
+{
+    "name": "w3ocom/fieldspack",
+    "description": "FieldsPack class to extend php pack/unpack functions",
+    "license": "Apache-2.0",
+    "authors": [
+        {
+            "name": "Alexander Jer",
+            "email": "alex@w3o.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "w3ocom\\FieldsPack\\": "src/"
+        }
+    },
+    "require-dev": {
+        "phpunit/phpunit": "*",
+        "vitexsoftware/phpunit-skeleton-generator": "2.1.0"
+    }
+}
