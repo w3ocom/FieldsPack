@@ -1,11 +1,12 @@
 <?php
+declare(strict_types=1);
 
 namespace w3ocom\FieldsPack;
 
 class FieldsPackOpt extends FieldsPackMain
 {
-    public $header_bytes = 0; // how many bytes in _f field (or 0 if _f not exist)
-    public $header_name = '_f';
+    public int $header_bytes = 0; // how many bytes in _f field (or 0 if _f not exist)
+    public string $header_name = '_f';
 
     public function pack(array $arr): Result\Any
     {
@@ -17,12 +18,12 @@ class FieldsPackOpt extends FieldsPackMain
         $wr_arr = [];
         $bit = 1;
         $mask = 0;
-        $mask_fmt = reset($this->fields);
-        if (key($this->fields) !== $this->header_name) {
+        $mask_fmt = reset($this->fields_arr);
+        if (key($this->fields_arr) !== $this->header_name) {
             return new Result\Err("First field name must have name " . $this->header_name);
         }
-        while($fmt = next($this->fields)) {
-            $name = key($this->fields);
+        while($fmt = next($this->fields_arr)) {
+            $name = key($this->fields_arr);
             if (isset($arr[$name])) {
                 $v = $arr[$name];
                 if (substr($fmt, 1, 1) === '*') {
@@ -44,7 +45,7 @@ class FieldsPackOpt extends FieldsPackMain
         if (count($wr_arr) != count($arr)) {
             // additional check because values may contain NULL
             foreach($arr as $name => $v) {
-                if (isset($this->fields[$name])) continue;
+                if (isset($this->fields_arr[$name])) continue;
                 return new Result\Err("Pack error: Unknown field '$name'");
             }
         }
@@ -61,24 +62,24 @@ class FieldsPackOpt extends FieldsPackMain
             return new Result\Err("Illegal raw_data");
         }
 
-        $mask_fmt = reset($this->fields);
+        $mask_fmt = reset($this->fields_arr);
         $mask = unpack($mask_fmt, substr($_raw, 0, $this->header_bytes))[1];
 
-        $fmt = next($this->fields);
+        $fmt = next($this->fields_arr);
         $recfmt = [];
         $_ext_arr = [];
         $up_bit = 2 ** (8 * $this->header_bytes);
         for($bit = 1; $bit < $up_bit; $bit *= 2) {
             if (false === $fmt) break;
             if ($mask & $bit) {
-                $name = key($this->fields);
+                $name = key($this->fields_arr);
                 if (substr($fmt, 1, 1) === '*') {
                     $_ext_arr[] = $name;
                     $fmt = substr($fmt, 0, 1);
                 }
                 $recfmt[] = $fmt . $name;
             }
-            $fmt = next($this->fields);
+            $fmt = next($this->fields_arr);
         }
         $recfmt[] = 'a**';
         $_fmt = implode('/', $recfmt);

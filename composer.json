@@ -13,6 +13,7 @@
             "w3ocom\\FieldsPack\\": "src/"
         }
     },
+    "require": {},
     "require-dev": {
         "phpunit/phpunit": "*",
         "vitexsoftware/phpunit-skeleton-generator": "2.1.0"

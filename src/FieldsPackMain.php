@@ -3,20 +3,39 @@ namespace w3ocom\FieldsPack;
 
 class FieldsPackMain implements FieldsPackInterface
 {
-    public $fixed_len = false;
-    public $_ext_arr = []; // only for non-opti mode
-    public $fields_pk = false;
-    public $fields_un = false;
-    public $fields = [];
+    /**
+     * How many bytes are in fixed-size part of fields-package
+     * @var int
+     */
+    public int $fixed_len = 0;
+
+    public string $fields_pk;
+    public string $fields_un;
+
+    /**
+     * Fields array: field_name => field_fmtChar
+     * @var array<string>
+     */
+    public array $fields_arr = [];
+
+    /**
+     * Field names with *-specified-length
+     * @var array<string>
+     */
+    public array $_ext_arr = [];
     
-    public $inc_h = false; // include add-fields to results for unpackArr
+    /**
+     * if set to true, optional fields will be included to results of unpackArr
+     * @var bool
+     */
+    public bool $inc_h = false;
 
     public function __construct(?string $fields_un = null)
     {
         if ($fields_un) {
             $err = $this->setFields($fields_un);
             if ($err->isErr()) {
-                throw new \Exception($err);
+                throw new \Exception($err->getErr());
             }
         }
     }
@@ -26,10 +45,10 @@ class FieldsPackMain implements FieldsPackInterface
         // parse fields to array
         $result = self::unpackFmtParse($fields_un);
         if ($result->isErr()) {
-            return new Result\Err("Bad fields-format: '$fields_un' (" . $result . ")");
+            return new Result\Err("Bad fields-format: '$fields_un' (" . $result->getErr() . ")");
         }
 
-        $this->fields = $fmt_arr = $result->getArr();
+        $this->fields_arr = $fmt_arr = $result->getArr();
 
         // calculate header_bytes
         $fcnt = count($fmt_arr);
@@ -69,7 +88,9 @@ class FieldsPackMain implements FieldsPackInterface
         }
         $this->fields_pk = implode('', $pk);
         $this->fixed_len = $fixed_len;
-        $_ext_un[] = $last_field ?? 'a**';
+        if ($last_field !== '') {
+            $_ext_un[] = $last_field ?? 'a**';
+        }
         $this->fields_un = implode('/', $_ext_un);
         $this->_ext_arr = $_ext_arr;
 
@@ -81,7 +102,7 @@ class FieldsPackMain implements FieldsPackInterface
      *
      * @staticvar array $bl
      * @param string $fmtChar
-     * @return false|integer
+     * @return integer
      */
     public static function fmtMultiBytesLen(string $fmtChar): int
     {
@@ -101,14 +122,14 @@ class FieldsPackMain implements FieldsPackInterface
     }
 
     /**
-     * Convert unpack-format string to format-array
+     * Convert unpack-format string to fields-array
      *
      * Return:
-     *  array = success. contain field items [name]=>pack-format
-     *  string = error
+     *  Result\Arr = success. contain field items [name]=>pack-format
+     *  Result\Err = error
      *
      * @param string $fields_un
-     * @return string|array
+     * @return Result\Any
      */
     public static function unpackFmtParse(string $fields_un): Result\Any
     {
@@ -138,26 +159,35 @@ class FieldsPackMain implements FieldsPackInterface
     /**
      * Back-function for unpackFmtParse
      *
-     * In: Array with fields
-     * Out: packed-string
+     * In: Array field_name => fmtChar
+     * Out: Result\Str with packed-string
      *
-     * @param array $fields_arr
-     * @return string
+     * @param array<string> $fields_arr
+     * @return Result\Any
      */
     public static function packFmtFields(array $fields_arr): Result\Any
     {
         $arr = [];
-        foreach($fields_arr as $name => $fmt) {
-            $arr[] = $fmt . $name;
+        foreach($fields_arr as $name => $fmtChar) {
+            $arr[] = $fmtChar . $name;
         }
         return new Result\Str(implode('/', $arr));
     }
 
+    /**
+     * Pack array to string
+     * 
+     * In: array of field_name => field_value
+     * Out: Result\Str = success
+     * 
+     * @param array<mixed> $arr
+     * @return Result\Any
+     */
     public function pack(array $arr): Result\Any
     {
         $wr_arr = [];
         $ex_str = '';
-        foreach($this->fields as $name => $fmt) {
+        foreach($this->fields_arr as $name => $fmt) {
             if (substr($fmt, 1, 1) === '*') {
                 $ex_str .= $v = isset($arr[$name]) ? $arr[$name] : '';
                 $wr_arr[] = pack(substr($fmt, 0, 1), strlen($v));

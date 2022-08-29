@@ -1,14 +1,16 @@
 <?php
+declare(strict_types=1);
+
 namespace w3ocom\FieldsPack\Result;
 
 class Arr implements Any {
     protected array $data;
     
     public function __construct(array $arr) {
-        $this->setArr($arr);
+        $this->setData($arr);
     }
     
-    public function setArr(array $arr): void {
+    public function setData(array $arr): void {
         $this->data = $arr;
     }
 

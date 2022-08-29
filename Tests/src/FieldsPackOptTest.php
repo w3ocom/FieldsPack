@@ -9,9 +9,9 @@ use w3ocom\FieldsPack\FieldsPackOpt;
  */
 class FieldsPackOptTest extends FieldsPackMainTest {
    
-    protected $is_opt_mode = true;
+    protected bool $is_opt_mode = true;
 
-    public $tst_class = 'FieldsPackOpt';
+    public string $tst_class = 'FieldsPackOpt';
 
     /**
      * @dataProvider packUnpackProvider

@@ -5,10 +5,10 @@ class Str implements Any {
     protected string $data;
     
     public function __construct(string $str) {
-        $this->setStr($str);
+        $this->setData($str);
     }
     
-    public function setStr($str): void {
+    public function setData($str): void {
         $this->data = $str;
     }
 

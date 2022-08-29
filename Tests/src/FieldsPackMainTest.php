@@ -9,11 +9,11 @@ class FieldsPackMainTest extends \PHPUnit\Framework\TestCase {
     /**
      * @var FieldsPackMain
      */
-    protected $object;
+    protected object $object;
     
-    protected $is_opt_mode = false;
+    protected bool $is_opt_mode = false;
     
-    public $tst_class = 'FieldsPackMain';
+    public string $tst_class = 'FieldsPackMain';
 
     public function setUp(): void {
         $class = "w3ocom\\FieldsPack\\" . $this->tst_class;
