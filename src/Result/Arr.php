@@ -13,6 +13,10 @@ class Arr implements Any {
     public function setData(array $arr): void {
         $this->data = $arr;
     }
+    
+    public function setKeyValue(string $key, $value) {
+        $this->data[$key] = $value;
+    }
 
     public function getArr(): array {
         return $this->data;
